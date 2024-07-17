@@ -1,0 +1,14 @@
+
+Item Stone:
+  Name:
+    en: Stone
+    ja: 石
+
+Item Firestone:
+  name:
+    en: Firestone
+    ja: 火打石
+
+Group BasicMaterials:
+  &Stone: 1
+  &Firestone: 1
