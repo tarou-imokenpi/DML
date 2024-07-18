@@ -1,14 +1,15 @@
-
-Item Stone:
-  Name:
-    en: Stone
-    ja: 石
+import ファイル名
+from ファイル名.dml import item_id, group_name
+ Item Stone:
+  Translations:
+    en: "Stone"
+    ja: "石"
 
 Item Firestone:
-  name:
-    en: Firestone
-    ja: 火打石
+  Translations:
+    en: "Firestone"
+    ja: "火打石"
 
 Group BasicMaterials:
-  &Stone: 1
-  &Firestone: 1
+  &Stone: -1.12
+  &Firestone: -10
