@@ -1,18 +1,19 @@
 use fnv::FnvHashMap;
+use std::{borrow::Cow, collections::HashMap};
 
 fn main() {
     let input = r#"
-# import ファイル名
-# from ファイル名.dml import item_id, group_name
-# Item Stone:
-#  Name:
-#    en: "Stone"
-#    ja: "石"
+import ファイル名
+from ファイル名.dml import item_id, group_name
+ Item Stone:
+  Name:
+    en: "Stone"
+    ja: "石"
 
-#Item Firestone:
-#  Name:
-#    en: "Firestone"
-#    ja: "火打石"
+Item Firestone:
+  Name:
+    en: "Firestone"
+    ja: "火打石"
 
 Group BasicMaterials:
   &Stone: -1.12
@@ -22,10 +23,14 @@ Group BasicMaterials:
     let mut lexer = Lexer::new(input.to_string());
     lexer.generate_tokens();
     println!("{:?}", lexer.tokens);
+
+    let mut parser = Parser::new(lexer.tokens);
+
+    // parser.parse();
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum Token {
     Item,
     Group,
@@ -39,7 +44,13 @@ enum Token {
     Line(usize),
     Indent,
     String(String),
-    Identifier(String),
+    Identifier(Cow<'static, str>),
+}
+
+impl Token {
+    fn is_type(&self, token: &Token) -> bool {
+        std::mem::discriminant(self) == std::mem::discriminant(token)
+    }
 }
 
 struct Lexer {
@@ -129,7 +140,7 @@ impl Lexer {
                     }
                 }
                 self.advance();
-                self.tokens.push(Token::String(buffer));
+                self.tokens.push(Token::String(buffer.into()));
             }
             '-' => {
                 if let Some(c) = self.peek_next() {
@@ -184,7 +195,87 @@ impl Lexer {
             "Name" => Token::Name,
             "from" => Token::From,
             "import" => Token::Import,
-            _ => Token::Identifier(buffer),
+            _ => Token::Identifier(buffer.into()),
         });
     }
+}
+
+struct Parser {
+    tokens: Vec<Token>,
+    position: usize,
+}
+
+impl Parser {
+    fn new(tokens: Vec<Token>) -> Self {
+        Parser {
+            tokens,
+            position: 0,
+        }
+    }
+
+    fn peek(&self) -> Option<&Token> {
+        self.tokens.get(self.position)
+    }
+
+    fn peek_next(&self) -> Option<&Token> {
+        self.tokens.get(self.position + 1)
+    }
+
+    fn peek_by(&self, n: usize) -> Option<&Token> {
+        self.tokens.get(self.position + n)
+    }
+
+    fn advance(&mut self) {
+        self.position += 1;
+    }
+
+    fn advance_by(&mut self, n: usize) {
+        self.position += n;
+    }
+
+    fn is_next_token_type(&self, n: usize, token: Token) -> bool {
+        if let Some(t) = self.peek_by(n) {
+            t.is_type(&token)
+        } else {
+            false
+        }
+    }
+
+    fn token_flow(&self, tokens: Vec<Token>) -> bool {
+        let mut count = 1;
+        for token in tokens.iter() {
+            if self.peek_by(count) == Some(token) {
+                count += 1;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    fn parse(&mut self) {
+        while let Some(token) = self.peek() {
+            match token {
+                Token::Item => self.parse_item(),
+                Token::Group => self.parse_group(),
+                _ => self.advance(),
+            }
+        }
+    }
+    fn parse_item(&mut self) {
+        self.advance();
+        if self.token_flow(vec![
+            Token::Identifier(Cow::Borrowed("")),
+            Token::Colon,
+            Token::Line(0),
+        ]) {
+            let mut item: HashMap<String, Item> = HashMap::new();
+        }
+    }
+
+    fn parse_group(&mut self) {}
+}
+
+struct Item {
+    name: HashMap<String, String>,
 }
