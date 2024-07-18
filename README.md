@@ -8,9 +8,9 @@ DMLは、アイテムやグループの定義、依存関係を管理するた�
 #### アイテムの定義
 ```dml
 Item item_id:
-  Name:
-    en: 英語名
-    ja: 日本語名
+  Translations:
+    en: "英語名"
+    ja: "日本語名"
 ```
 - `item_id`: アイテムの一意な識別子。
 - `en`: 英語名。
@@ -43,14 +43,14 @@ Group group_name:
 #### ファイル `materials.dml`
 ```dml
 Item Stone:
-  Name:
-    en: Stone
-    ja: 石
+  Translations:
+    en: "Stone"
+    ja: "石"
 
 Item Firestone:
-  Name:
-    en: Firestone
-    ja: 火打石
+  Translations:
+    en: "Firestone"
+    ja: "火打石"
 
 Group BasicMaterials:
   &Stone: 1
@@ -60,9 +60,9 @@ Group BasicMaterials:
 #### ファイル `food.dml`
 ```dml
 Item RawMeat:
-  Name:
-    en: Raw Meat
-    ja: 生肉
+  Translations:
+    en: "Raw Meat"
+    ja: "生肉"
 
 Group Food:
   &RawMeat: 1
