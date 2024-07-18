@@ -1,3 +1,5 @@
+use fnv::FnvHashMap;
+
 fn main() {
     let input = r#"
 # import ファイル名
@@ -185,4 +187,18 @@ impl Lexer {
             _ => Token::Identifier(buffer),
         });
     }
+}
+
+struct Parser {
+    tokens: Vec<Token>,
+    position: usize,
+}
+
+struct Item {
+    name: String,
+    translations: FnvHashMap<String, String>,
+}
+
+struct Group {
+    items: Vec<Item>,
 }
