@@ -6,12 +6,12 @@ fn main() {
 import ファイル名
 from ファイル名.dml import item_id, group_name
  Item Stone:
-  Name:
+  Translations:
     en: "Stone"
     ja: "石"
 
 Item Firestone:
-  Name:
+  Translations:
     en: "Firestone"
     ja: "火打石"
 
@@ -35,7 +35,7 @@ enum Token {
     Item,
     Group,
     Reference,
-    Name,
+    Translations,
     Colon,
     Int(i128),
     Float(f64),
@@ -192,7 +192,7 @@ impl Lexer {
         self.tokens.push(match buffer.as_str() {
             "Item" => Token::Item,
             "Group" => Token::Group,
-            "Name" => Token::Name,
+            "Translations" => Token::Translations,
             "from" => Token::From,
             "import" => Token::Import,
             _ => Token::Identifier(buffer.into()),
@@ -277,5 +277,5 @@ impl Parser {
 }
 
 struct Item {
-    name: HashMap<String, String>,
+    translations: HashMap<String, String>,
 }
