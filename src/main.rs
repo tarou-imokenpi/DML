@@ -188,17 +188,3 @@ impl Lexer {
         });
     }
 }
-
-struct Parser {
-    tokens: Vec<Token>,
-    position: usize,
-}
-
-struct Item {
-    name: String,
-    translations: FnvHashMap<String, String>,
-}
-
-struct Group {
-    items: Vec<Item>,
-}
