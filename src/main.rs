@@ -299,7 +299,7 @@ impl Parser {
     }
 
     /// トークンのパターンが正しいかどうかを確認するメソッド
-    fn is_valid_token_pattern(&mut self) -> bool {
+    fn is_define(&mut self) -> bool {
         self.token_flow(vec![
             TokenType::Identifier,
             TokenType::Colon,
@@ -327,7 +327,7 @@ impl Parser {
     /// Itemをパースするメソッド
     fn parse_item(&mut self) {
         self.advance();
-        if self.is_valid_token_pattern() {
+        if self.is_define() {
             println!("Item Found: id = {:?}", self.peek().unwrap());
             self.advance_by(3);
         }
@@ -336,7 +336,7 @@ impl Parser {
     /// Groupをパースするメソッド
     fn parse_group(&mut self) {
         self.advance();
-        if self.is_valid_token_pattern() {
+        if self.is_define() {
             println!("Group Found: id = {:?}", self.peek().unwrap());
             self.advance_by(3);
         }
