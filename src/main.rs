@@ -1,34 +1,28 @@
 use fnv::FnvHashMap;
-use std::{borrow::Cow, collections::HashMap};
-
+use std::mem::discriminant;
+use std::{borrow::Cow, collections::HashMap, fs};
 fn main() {
-    let input = r#"
-import ファイル名
-from ファイル名.dml import item_id, group_name
- Item Stone:
-  Translations:
-    en: "Stone"
-    ja: "石"
+    let file_path = "./test.dml";
+    let mut input = String::new();
+    match fs::read_to_string(file_path) {
+        Ok(contents) => {
+            println!("File Read OK");
+            input = contents;
+        }
+        Err(e) => {
+            println!("Failed to read file: {}", e);
+        }
+    }
 
-Item Firestone:
-  Translations:
-    en: "Firestone"
-    ja: "火打石"
-
-Group BasicMaterials:
-  &Stone: -1.12
-  &Firestone: -10
-"#;
-
-    let mut lexer = Lexer::new(input.to_string());
+    let mut lexer = Lexer::new(input);
     lexer.generate_tokens();
     println!("{:?}", lexer.tokens);
 
     let mut parser = Parser::new(lexer.tokens);
 
-    // parser.parse();
+    parser.parse();
 
-    todo!("Propertiesの追加")
+    // todo!("Propertiesの追加")
 }
 
 #[allow(dead_code)]
@@ -37,7 +31,6 @@ enum Token {
     Item,
     Group,
     Reference,
-    Translations,
     Colon,
     Int(i128),
     Float(f64),
@@ -49,9 +42,59 @@ enum Token {
     Identifier(Cow<'static, str>),
 }
 
+#[allow(dead_code)]
+#[derive(Debug, PartialEq)]
+enum TokenType {
+    Item,
+    Group,
+    Reference,
+    Colon,
+    Int,
+    Float,
+    From,
+    Import,
+    Line,
+    Indent,
+    String,
+    Identifier,
+}
+
 impl Token {
-    fn is_type(&self, token: &Token) -> bool {
-        std::mem::discriminant(self) == std::mem::discriminant(token)
+    // Tokenの種類をチェックするメソッド
+    fn get_token_type(&self) -> TokenType {
+        match self {
+            Token::Item => TokenType::Item,
+            Token::Group => TokenType::Group,
+            Token::Reference => TokenType::Reference,
+            Token::Colon => TokenType::Colon,
+            Token::Int(_) => TokenType::Int,
+            Token::Float(_) => TokenType::Float,
+            Token::From => TokenType::From,
+            Token::Import => TokenType::Import,
+            Token::Line(_) => TokenType::Line,
+            Token::Indent => TokenType::Indent,
+            Token::String(_) => TokenType::String,
+            Token::Identifier(_) => TokenType::Identifier,
+        }
+    }
+}
+
+impl PartialEq<TokenType> for Token {
+    fn eq(&self, other: &TokenType) -> bool {
+        match self {
+            Token::Item => *other == TokenType::Item,
+            Token::Group => *other == TokenType::Group,
+            Token::Reference => *other == TokenType::Reference,
+            Token::Colon => *other == TokenType::Colon,
+            Token::Int(_) => *other == TokenType::Int,
+            Token::Float(_) => *other == TokenType::Float,
+            Token::From => *other == TokenType::From,
+            Token::Import => *other == TokenType::Import,
+            Token::Line(_) => *other == TokenType::Line,
+            Token::Indent => *other == TokenType::Indent,
+            Token::String(_) => *other == TokenType::String,
+            Token::Identifier(_) => *other == TokenType::Identifier,
+        }
     }
 }
 
@@ -194,7 +237,6 @@ impl Lexer {
         self.tokens.push(match buffer.as_str() {
             "Item" => Token::Item,
             "Group" => Token::Group,
-            "Translations" => Token::Translations,
             "from" => Token::From,
             "import" => Token::Import,
             _ => Token::Identifier(buffer.into()),
@@ -205,6 +247,7 @@ impl Lexer {
 struct Parser {
     tokens: Vec<Token>,
     position: usize,
+    indent_level: usize,
 }
 
 impl Parser {
@@ -212,6 +255,7 @@ impl Parser {
         Parser {
             tokens,
             position: 0,
+            indent_level: 0,
         }
     }
 
@@ -235,49 +279,62 @@ impl Parser {
         self.position += n;
     }
 
-    fn is_next_token_type(&self, n: usize, token: Token) -> bool {
-        if let Some(t) = self.peek_by(n) {
-            t.is_type(&token)
-        } else {
-            false
-        }
-    }
-
-    fn token_flow(&self, tokens: Vec<Token>) -> bool {
-        let mut count = 1;
-        for token in tokens.iter() {
-            if self.peek_by(count) == Some(token) {
-                count += 1;
+    fn token_flow(&self, token_types: Vec<TokenType>) -> bool {
+        for (i, token_type) in token_types.iter().enumerate() {
+            // self.tokens から現在の位置 + i にあるトークンのトークンタイプを取得
+            if let Some(token) = self.tokens.get(self.position + i) {
+                // トークンタイプが一致するか確認
+                if token != token_type {
+                    panic!("not match token type: {:?}", token);
+                    // return false;
+                }
             } else {
+                // トークンが存在しない場合は、false を返す
                 return false;
             }
         }
-        return true;
+        true
     }
 
     fn parse(&mut self) {
+        println!("Parsing Started");
         while let Some(token) = self.peek() {
             match token {
                 Token::Item => self.parse_item(),
                 Token::Group => self.parse_group(),
-                _ => self.advance(),
+                // Token::Indent => self.parse_indent(),
+                _ => {
+                    // println!("{:?}", &token);
+                    self.advance();
+                }
             }
         }
+        println!("Parsing Finished");
     }
+
     fn parse_item(&mut self) {
         self.advance();
         if self.token_flow(vec![
-            Token::Identifier(Cow::Borrowed("")),
-            Token::Colon,
-            Token::Line(0),
+            TokenType::Identifier,
+            TokenType::Colon,
+            TokenType::Line,
         ]) {
-            let mut item: HashMap<String, Item> = HashMap::new();
+            println!("Item Found: id = {:?}", self.peek().unwrap());
+            self.advance_by(3);
         }
     }
 
-    fn parse_group(&mut self) {}
-}
+    fn parse_group(&mut self) {
+        self.advance();
+        if self.token_flow(vec![
+            TokenType::Identifier,
+            TokenType::Colon,
+            TokenType::Line,
+        ]) {
+            println!("Group Found: id = {:?}", self.peek().unwrap());
+            self.advance_by(3);
+        }
+    }
 
-struct Item {
-    translations: HashMap<String, String>,
+    // fn parse_indent(&mut self) {}
 }
