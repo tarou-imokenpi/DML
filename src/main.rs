@@ -80,6 +80,8 @@ impl Token {
 }
 
 impl PartialEq<TokenType> for Token {
+    // TokenTypeとTokenの比較を行うメソッド
+    // TokenとTokenTypeは同じものとして扱う
     fn eq(&self, other: &TokenType) -> bool {
         match self {
             Token::Item => *other == TokenType::Item,
@@ -296,13 +298,22 @@ impl Parser {
         true
     }
 
+    /// トークンのパターンが正しいかどうかを確認するメソッド
+    fn is_valid_token_pattern(&mut self) -> bool {
+        self.token_flow(vec![
+            TokenType::Identifier,
+            TokenType::Colon,
+            TokenType::Line,
+        ])
+    }
+
     fn parse(&mut self) {
         println!("Parsing Started");
         while let Some(token) = self.peek() {
             match token {
                 Token::Item => self.parse_item(),
                 Token::Group => self.parse_group(),
-                // Token::Indent => self.parse_indent(),
+                Token::Indent => self.parse_indent(),
                 _ => {
                     // println!("{:?}", &token);
                     self.advance();
@@ -312,29 +323,26 @@ impl Parser {
         println!("Parsing Finished");
     }
 
+    /// Itemをパースするメソッド
     fn parse_item(&mut self) {
         self.advance();
-        if self.token_flow(vec![
-            TokenType::Identifier,
-            TokenType::Colon,
-            TokenType::Line,
-        ]) {
+        if self.is_valid_token_pattern() {
             println!("Item Found: id = {:?}", self.peek().unwrap());
             self.advance_by(3);
         }
     }
 
+    /// Groupをパースするメソッド
     fn parse_group(&mut self) {
         self.advance();
-        if self.token_flow(vec![
-            TokenType::Identifier,
-            TokenType::Colon,
-            TokenType::Line,
-        ]) {
+        if self.is_valid_token_pattern() {
             println!("Group Found: id = {:?}", self.peek().unwrap());
             self.advance_by(3);
         }
     }
 
-    // fn parse_indent(&mut self) {}
+    /// インデントをパースするメソッド
+    fn parse_indent(&mut self) {
+        self.indent_level += 1;
+    }
 }
