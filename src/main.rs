@@ -314,6 +314,7 @@ impl Parser {
                 Token::Item => self.parse_item(),
                 Token::Group => self.parse_group(),
                 Token::Indent => self.parse_indent(),
+                Token::Line(_) => self.parse_line(),
                 _ => {
                     // println!("{:?}", &token);
                     self.advance();
@@ -344,5 +345,11 @@ impl Parser {
     /// インデントをパースするメソッド
     fn parse_indent(&mut self) {
         self.indent_level += 1;
+    }
+
+    /// 改行をパースするメソッド
+    fn parse_line(&mut self) {
+        self.indent_level = 0;
+        self.advance();
     }
 }
