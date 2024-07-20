@@ -36,7 +36,7 @@ enum Token {
     Float(f64),
     From,
     Import,
-    Line(usize),
+    NewLine,
     Indent,
     String(String),
     Identifier(Cow<'static, str>),
@@ -71,7 +71,7 @@ impl Token {
             Token::Float(_) => TokenType::Float,
             Token::From => TokenType::From,
             Token::Import => TokenType::Import,
-            Token::Line(_) => TokenType::Line,
+            Token::NewLine => TokenType::Line,
             Token::Indent => TokenType::Indent,
             Token::String(_) => TokenType::String,
             Token::Identifier(_) => TokenType::Identifier,
@@ -92,7 +92,7 @@ impl PartialEq<TokenType> for Token {
             Token::Float(_) => *other == TokenType::Float,
             Token::From => *other == TokenType::From,
             Token::Import => *other == TokenType::Import,
-            Token::Line(_) => *other == TokenType::Line,
+            Token::NewLine => *other == TokenType::Line,
             Token::Indent => *other == TokenType::Indent,
             Token::String(_) => *other == TokenType::String,
             Token::Identifier(_) => *other == TokenType::Identifier,
@@ -155,7 +155,7 @@ impl Lexer {
                 }
             }
             '\n' => {
-                self.tokens.push(Token::Line(self.line));
+                self.tokens.push(Token::NewLine);
                 self.line += 1;
                 self.advance();
             }
@@ -250,6 +250,7 @@ struct Parser {
     tokens: Vec<Token>,
     position: usize,
     indent_level: usize,
+    line: usize,
 }
 
 impl Parser {
@@ -258,6 +259,7 @@ impl Parser {
             tokens,
             position: 0,
             indent_level: 0,
+            line: 1,
         }
     }
 
@@ -287,8 +289,8 @@ impl Parser {
             if let Some(token) = self.tokens.get(self.position + i) {
                 // トークンタイプが一致するか確認
                 if token != token_type {
-                    panic!("not match token type: {:?}", token);
-                    // return false;
+                    // panic!("not match token type: {:?}", token);
+                    return false;
                 }
             } else {
                 // トークンが存在しない場合は、false を返す
@@ -298,13 +300,37 @@ impl Parser {
         true
     }
 
+    fn parse_error(&self, message: &str) {
+        panic!("Parse Error: line[{}], message: {}", self.line, message);
+    }
+
     /// トークンのパターンが正しいかどうかを確認するメソッド
-    fn is_define(&mut self) -> bool {
-        self.token_flow(vec![
+    fn check_group_statement(&mut self) -> bool {
+        if self.token_flow(vec![
             TokenType::Identifier,
             TokenType::Colon,
             TokenType::Line,
-        ])
+        ]) {
+            self.advance_by(3);
+            self.line += 1;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    fn check_item_statement(&mut self) -> bool {
+        if self.token_flow(vec![
+            TokenType::Identifier,
+            TokenType::Colon,
+            TokenType::Line,
+        ]) {
+            self.advance_by(3);
+            self.line += 1;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     fn parse(&mut self) {
@@ -314,7 +340,7 @@ impl Parser {
                 Token::Item => self.parse_item(),
                 Token::Group => self.parse_group(),
                 Token::Indent => self.parse_indent(),
-                Token::Line(_) => self.parse_line(),
+                Token::NewLine => self.parse_new_line(),
                 _ => {
                     // println!("{:?}", &token);
                     self.advance();
@@ -327,29 +353,33 @@ impl Parser {
     /// Itemをパースするメソッド
     fn parse_item(&mut self) {
         self.advance();
-        if self.is_define() {
+        if self.check_item_statement() {
             println!("Item Found: id = {:?}", self.peek().unwrap());
-            self.advance_by(3);
+        } else {
+            self.parse_error("Item Statement is invalid");
         }
     }
 
     /// Groupをパースするメソッド
     fn parse_group(&mut self) {
         self.advance();
-        if self.is_define() {
+        if self.check_group_statement() {
             println!("Group Found: id = {:?}", self.peek().unwrap());
-            self.advance_by(3);
+        } else {
+            self.parse_error("Group Statement is invalid");
         }
     }
 
     /// インデントをパースするメソッド
     fn parse_indent(&mut self) {
         self.indent_level += 1;
+        self.advance();
     }
 
     /// 改行をパースするメソッド
-    fn parse_line(&mut self) {
+    fn parse_new_line(&mut self) {
         self.indent_level = 0;
+        self.line += 1;
         self.advance();
     }
 }
