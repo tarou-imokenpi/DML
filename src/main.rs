@@ -1,14 +1,19 @@
 use std::error::Error;
 
+extern crate nom;
+pub use nom::bytes::complete::tag;
+
 use nom::IResult;
 
-pub fn do_nothing_parser(input: &str) -> IResult<&str, &str> {
-    Ok((input, ""))
+fn parse_input(input: &str) -> IResult<&str, &str> {
+    tag("abc")(input)
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let (remaining_input, output) = do_nothing_parser("my_input")?;
-    assert_eq!(remaining_input, "my_input");
-    assert_eq!(output, "");
+    let (leftover_input, output) = parse_input("abcWorld")?;
+    assert_eq!(leftover_input, "World");
+    assert_eq!(output, "abc");
+
+    assert!(parse_input("defWorld").is_err());
     Ok(())
 }
