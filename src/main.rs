@@ -1,19 +1,31 @@
-extern crate nom;
-use nom::branch::alt;
-use nom::bytes::complete::tag;
-pub use nom::character::complete::space1;
-use nom::IResult;
 use std::error::Error;
 
-fn parse_abc_or_def(input: &str) -> IResult<&str, &str> {
-    alt((tag("abc"), tag("def")))(input)
+use nom::bytes::complete::tag;
+use nom::character::complete::i32;
+use nom::sequence::{delimited, separated_pair};
+use nom::IResult;
+#[derive(Debug, PartialEq)]
+pub struct Coordinate {
+    pub x: i32,
+    pub y: i32,
+}
+
+fn parse_integer_pair(input: &str) -> IResult<&str, (i32, i32)> {
+    separated_pair(i32, tag(", "), i32)(input)
+}
+
+fn parse_coordinate(input: &str) -> IResult<&str, Coordinate> {
+    let (remaining, (x, y)) = delimited(tag("("), parse_integer_pair, tag(")"))(input)?;
+
+    Ok((remaining, Coordinate { x, y }))
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let (leftover_input, output) = parse_abc_or_def("abcWorld")?;
-    assert_eq!(leftover_input, "World");
-    assert_eq!(output, "abc");
+    let (_, parsed) = parse_coordinate("(3,5)")?;
 
-    assert!(parse_abc_or_def("ghiWorld").is_err());
+    assert_eq!(parsed, Coordinate { x: 3, y: 5 });
+
+    println!("{:?}", parsed);
+
     Ok(())
 }
