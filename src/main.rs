@@ -82,12 +82,16 @@ impl Processer {
                 }
                 Rule::string => {
                     println!("String: {}", record.as_str());
-                    value = record.as_str().to_string();
+                    value = self.process_string(record.into_inner());
                 }
                 _ => {}
             }
         }
         self.add_variable(id, value);
+    }
+
+    fn process_string(&mut self, string: pest::iterators::Pairs<Rule>) -> String {
+        string.as_str().to_string()
     }
 
     fn process_item(&mut self, item: pest::iterators::Pairs<Rule>) -> Item {
@@ -162,7 +166,7 @@ impl Processer {
                 }
                 Rule::string => {
                     println!("String: {}", record.as_str());
-                    value = record.as_str().to_string();
+                    value = self.process_string(record.into_inner());
                 }
                 Rule::variable_reference => {
                     let (ref_id, amount) = self.process_pair(record.into_inner());
@@ -217,7 +221,7 @@ impl Processer {
                 }
                 Rule::string => {
                     println!("String: {}", record.as_str());
-                    value = record.as_str().to_string();
+                    value = self.process_string(record.into_inner());
                 }
                 Rule::variable_reference => {
                     let (ref_id, amount) = self.process_pair(record.into_inner());
@@ -245,4 +249,7 @@ fn main() {
     // to json
     let json = serde_json::to_string_pretty(&process).unwrap();
     println!("{}", json);
+
+    // to file
+    fs::write("./test.json", json).expect("Unable to write file");
 }

@@ -4,7 +4,7 @@ id                 = @{ ASCII_ALPHA ~ (ASCII_ALPHA | ASCII_DIGIT | "_")* }
 number             = @{
     "-"? ~ ("0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*) ~ ("." ~ ASCII_DIGIT*)? ~ ("e" ~ ("+" | "-")? ~ ASCII_DIGIT+)?
 }
-string             = @{ "\"" ~ inner ~ "\"" }
+string             =  { "\"" ~ inner ~ "\"" | "\'" ~ inner ~ "\'" }
 inner              = @{ char* }
 char               =  {
     !("\"" | "\\") ~ ANY
