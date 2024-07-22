@@ -164,6 +164,12 @@ impl Processer {
                     println!("String: {}", record.as_str());
                     value = record.as_str().to_string();
                 }
+                Rule::variable_reference => {
+                    let (ref_id, amount) = self.process_pair(record.into_inner());
+                    if let Some(v) = self.variable_map.get(&ref_id) {
+                        value = v.clone();
+                    }
+                }
                 _ => {}
             }
         }
@@ -212,6 +218,12 @@ impl Processer {
                 Rule::string => {
                     println!("String: {}", record.as_str());
                     value = record.as_str().to_string();
+                }
+                Rule::variable_reference => {
+                    let (ref_id, amount) = self.process_pair(record.into_inner());
+                    if let Some(v) = self.variable_map.get(&ref_id) {
+                        value = v.clone();
+                    }
                 }
                 _ => {}
             }
