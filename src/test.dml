@@ -1,16 +1,14 @@
-import ファイル名
-from ファイル名 import item_id, group_name
-
-
 Item Stone:
   Translations:
     en: "Stone"
     ja: "石"
 
+
 Item Firestone:
   Translations:
     en: "Firestone"
     ja: "火打石"
+
 
 Group BasicMaterials:
   &Stone: -1.12
