@@ -1,19 +1,18 @@
 use std::error::Error;
 
 extern crate nom;
-pub use nom::bytes::complete::tag;
-
+// pub use nom::bytes::complete::tag;
+pub use nom::character::complete::alpha0;
 use nom::IResult;
 
-fn parse_input(input: &str) -> IResult<&str, &str> {
-    tag("abc")(input)
+fn parser(input: &str) -> IResult<&str, &str> {
+    alpha0(input)
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let (leftover_input, output) = parse_input("abcWorld")?;
-    assert_eq!(leftover_input, "World");
-    assert_eq!(output, "abc");
+    let (remaining, letters) = parser("abc123")?;
+    assert_eq!(remaining, "123");
+    assert_eq!(letters, "abc");
 
-    assert!(parse_input("defWorld").is_err());
     Ok(())
 }
