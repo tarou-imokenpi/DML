@@ -1,108 +1,236 @@
 use pest::Parser;
 use pest_derive::Parser;
-use std::fs;
+use std::{collections::HashMap, fs};
 
 #[derive(Parser)]
 #[grammar = "dml.pest"]
 pub struct DMLParser;
 
+#[derive(Debug, serde::Serialize)]
+struct Group {
+    id: String,
+    pairs: HashMap<String, String>,
+    blocks: HashMap<String, Block>,
+    reference: HashMap<String, String>,
+}
+
+#[derive(Debug, serde::Serialize)]
+struct Item {
+    id: String,
+    pairs: HashMap<String, String>,
+    blocks: HashMap<String, Block>,
+}
+
+#[derive(Debug, serde::Serialize)]
+struct Block {
+    id: String,
+    pairs: HashMap<String, String>,
+    blocks: HashMap<String, Block>,
+}
+
+#[derive(Debug, serde::Serialize)]
+struct Processer {
+    variable_map: HashMap<String, String>,
+    item_map: HashMap<String, Item>,
+    group_map: HashMap<String, Group>,
+}
+
+impl Processer {
+    fn new() -> Processer {
+        Processer {
+            variable_map: HashMap::new(),
+            item_map: HashMap::new(),
+            group_map: HashMap::new(),
+        }
+    }
+
+    fn add_variable(&mut self, name: String, variable: String) {
+        self.variable_map.insert(name, variable);
+    }
+
+    fn process_dml(&mut self, dml: pest::iterators::Pairs<Rule>) {
+        for record in dml {
+            match record.as_rule() {
+                Rule::variable => {
+                    self.process_variable(record.into_inner());
+                }
+                Rule::item => {
+                    let item = self.process_item(record.into_inner());
+                    self.item_map.insert(item.id.clone(), item);
+                }
+                Rule::group => {
+                    let group = self.process_group(record.into_inner());
+                    self.group_map.insert(group.id.clone(), group);
+                }
+                _ => {}
+            }
+        }
+    }
+
+    fn process_variable(&mut self, variable: pest::iterators::Pairs<Rule>) {
+        let mut id = String::new();
+        let mut value = String::new();
+        for record in variable {
+            match record.as_rule() {
+                Rule::id => {
+                    println!("ID: {}", record.as_str());
+                    id = record.as_str().to_string();
+                }
+                Rule::number => {
+                    println!("Number: {}", record.as_str());
+                    value = record.as_str().to_string();
+                }
+                Rule::string => {
+                    println!("String: {}", record.as_str());
+                    value = record.as_str().to_string();
+                }
+                _ => {}
+            }
+        }
+        self.add_variable(id, value);
+    }
+
+    fn process_item(&mut self, item: pest::iterators::Pairs<Rule>) -> Item {
+        let mut item_strust = Item {
+            id: String::new(),
+            pairs: HashMap::new(),
+            blocks: HashMap::new(),
+        };
+        for record in item {
+            match record.as_rule() {
+                Rule::id => {
+                    println!("ID: {}", record.as_str());
+                    item_strust.id = record.as_str().to_string();
+                }
+                Rule::pair => {
+                    let (pair_name, value) = self.process_pair(record.into_inner());
+                    item_strust.pairs.insert(pair_name, value);
+                }
+                Rule::block => {
+                    let block = self.process_block(record.into_inner());
+                    item_strust.blocks.insert(block.id.clone(), block);
+                }
+                _ => {}
+            }
+        }
+        item_strust
+    }
+
+    fn process_group(&mut self, group: pest::iterators::Pairs<Rule>) -> Group {
+        let mut group_strust = Group {
+            id: String::new(),
+            pairs: HashMap::new(),
+            blocks: HashMap::new(),
+            reference: HashMap::new(),
+        };
+        for record in group {
+            match record.as_rule() {
+                Rule::id => {
+                    println!("ID: {}", record.as_str());
+                    group_strust.id = record.as_str().to_string();
+                }
+                Rule::pair => {
+                    let (pair_name, value) = self.process_pair(record.into_inner());
+                    group_strust.pairs.insert(pair_name, value);
+                }
+                Rule::block => {
+                    let block = self.process_block(record.into_inner());
+                    group_strust.blocks.insert(block.id.clone(), block);
+                }
+                Rule::reference => {
+                    let (reference_name, value) = self.process_reference(record.into_inner());
+                    group_strust.reference.insert(reference_name, value);
+                }
+                _ => {}
+            }
+        }
+        group_strust
+    }
+
+    fn process_reference(&mut self, reference: pest::iterators::Pairs<Rule>) -> (String, String) {
+        let mut id = String::new();
+        let mut value = String::new();
+        for record in reference {
+            match record.as_rule() {
+                Rule::id => {
+                    println!("ID: {}", record.as_str());
+                    id = record.as_str().to_string();
+                }
+                Rule::number => {
+                    println!("Number: {}", record.as_str());
+                    value = record.as_str().to_string();
+                }
+                Rule::string => {
+                    println!("String: {}", record.as_str());
+                    value = record.as_str().to_string();
+                }
+                _ => {}
+            }
+        }
+        (id, value)
+    }
+
+    fn process_block(&mut self, block: pest::iterators::Pairs<Rule>) -> Block {
+        let mut block_data = Block {
+            id: String::new(),
+            pairs: HashMap::new(),
+            blocks: HashMap::new(),
+        };
+        for record in block {
+            match record.as_rule() {
+                Rule::id => {
+                    println!("ID: {}", record.as_str());
+                    block_data.id = record.as_str().to_string();
+                }
+                Rule::pair => {
+                    let (pair_name, value) = self.process_pair(record.into_inner());
+                    block_data.pairs.insert(pair_name, value);
+                }
+                Rule::block => {
+                    let block = self.process_block(record.into_inner());
+                    block_data.blocks.insert(block.id.clone(), block);
+                }
+                _ => {}
+            }
+        }
+        block_data
+    }
+
+    fn process_pair(&mut self, pair: pest::iterators::Pairs<Rule>) -> (String, String) {
+        let mut id = String::new();
+        let mut value = String::new();
+        for record in pair {
+            match record.as_rule() {
+                Rule::id => {
+                    println!("ID: {}", record.as_str());
+                    id = record.as_str().to_string();
+                }
+                Rule::number => {
+                    println!("Number: {}", record.as_str());
+                    value = record.as_str().to_string();
+                }
+                Rule::string => {
+                    println!("String: {}", record.as_str());
+                    value = record.as_str().to_string();
+                }
+                _ => {}
+            }
+        }
+        (id, value)
+    }
+}
+
 fn main() {
     let input = fs::read_to_string("./test.dml").expect("Failed to read file");
-    let dml = DMLParser::parse(Rule::dml, &input)
-        .expect("Failed to parse")
-        .next()
-        .expect("No dml found");
+    let dml = DMLParser::parse(Rule::dml, &input).expect("Failed to parse");
+    let mut process = Processer::new(); // Call the new function
+    process.process_dml(dml.into_iter());
 
-    process_dml(dml);
-}
+    // println!("{:?}", process.variable_map);
+    // println!("{:?}", process.item_map);
+    // println!("{:?}", process.group_map);
 
-fn process_dml(dml: pest::iterators::Pair<Rule>) {
-    for record in dml.into_inner() {
-        for object in record.into_inner() {
-            match object.as_rule() {
-                Rule::variable => process_variable(object),
-                Rule::item => process_item(object),
-                Rule::group => process_group(object),
-                _ => println!("Unknown rule: {:?}", object.as_rule()),
-            }
-        }
-    }
-}
-
-fn process_variable(object: pest::iterators::Pair<Rule>) {
-    println!("Matched variable");
-    let mut inner_rules = object.into_inner();
-    let id = inner_rules.next().expect("No ID found").as_str();
-    let value = inner_rules.next().expect("No value found").as_str();
-    println!("Variable: {} = {}", id, value);
-}
-
-fn process_item(object: pest::iterators::Pair<Rule>) {
-    println!("Matched item");
-    let mut inner_rules = object.into_inner();
-    let item_name = inner_rules.next().expect("No item name found").as_str();
-    println!("Item: {}", item_name);
-
-    for block in inner_rules {
-        parse_block(block);
-    }
-}
-
-fn process_group(object: pest::iterators::Pair<Rule>) {
-    println!("Matched group");
-    let mut inner_rules = object.into_inner();
-    let group_name = inner_rules.next().expect("No group name found").as_str();
-    println!("Group: {}", group_name);
-
-    for ref_block in inner_rules {
-        parse_ref_block(ref_block);
-    }
-}
-
-fn parse_block(block: pest::iterators::Pair<Rule>) {
-    let block_name = block.as_str();
-    println!("  Block:{}", block_name);
-
-    for nested_block in block.into_inner() {
-        match nested_block.as_rule() {
-            Rule::field => {
-                let mut inner_fields = nested_block.into_inner();
-                let field_name = inner_fields.next().unwrap().as_str();
-                let field_value = inner_fields.next().unwrap().as_str();
-                println!("    Field: {} = {}", field_name, field_value);
-            }
-            Rule::block => parse_block(nested_block),
-            _ => {}
-        }
-    }
-}
-
-fn parse_ref_block(ref_block: pest::iterators::Pair<Rule>) {
-    let mut inner_rules = ref_block.into_inner();
-
-    while let Some(ref_item) = inner_rules.next() {
-        match ref_item.as_rule() {
-            Rule::reference => {
-                let mut ref_inner = ref_item.into_inner();
-                let item_name = ref_inner.next().unwrap().as_str();
-                let value = ref_inner.next().unwrap().as_str();
-                println!("  Ref: {} = {}", item_name, value);
-            }
-            Rule::nested_block => {
-                for nested in ref_item.into_inner() {
-                    match nested.as_rule() {
-                        Rule::reference => {
-                            let mut ref_inner = nested.into_inner();
-                            let item_name = ref_inner.next().unwrap().as_str();
-                            let value = ref_inner.next().unwrap().as_str();
-                            println!("  Ref: {} = {}", item_name, value);
-                        }
-                        Rule::block => parse_block(nested),
-                        _ => {}
-                    }
-                }
-            }
-            _ => {}
-        }
-    }
+    // to json
+    let json = serde_json::to_string_pretty(&process).unwrap();
+    println!("{}", json);
 }

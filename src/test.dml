@@ -1,7 +1,6 @@
 kari = 100
-
+tarou = "たろう"
 a = 1745244
-
 
 Item item_name1:
   object:
