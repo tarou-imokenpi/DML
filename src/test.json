@@ -23,15 +23,15 @@
                 "ob": {
                   "id": "ob",
                   "pairs": {
-                    "field2": "field_value",
-                    "field1": "field_value"
+                    "field1": "field_value",
+                    "field2": "field_value"
                   },
                   "blocks": {
                     "ob": {
                       "id": "ob",
                       "pairs": {
-                        "field1": "field_value",
-                        "field2": "field_value"
+                        "field2": "field_value",
+                        "field1": "field_value"
                       },
                       "blocks": {}
                     }
@@ -50,9 +50,9 @@
         "object": {
           "id": "object",
           "pairs": {
+            "field3": "field_value",
             "field1": "300",
-            "field2": "field_value",
-            "field3": "field_value"
+            "field2": "field_value"
           },
           "blocks": {}
         }
@@ -76,8 +76,8 @@
       "reference": {
         "item_name2": "20",
         "item_name1": "10",
-        "item_name3": "10",
-        "item_name4": "300"
+        "item_name4": "300",
+        "item_name3": "10"
       }
     }
   }

@@ -239,7 +239,7 @@ impl Processer {
 fn main() {
     let input = fs::read_to_string("./test.dml").expect("Failed to read file");
     let dml = DMLParser::parse(Rule::dml, &input).expect("Failed to parse");
-    let mut process = Processer::new(); // Call the new function
+    let mut process = Processer::new();
     process.process_dml(dml.into_iter());
 
     // println!("{:?}", process.variable_map);
