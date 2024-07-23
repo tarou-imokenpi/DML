@@ -1,8 +1,8 @@
 {
   "variable_map": {
-    "a": "1745244",
+    "tarou": "たろう",
     "kari": "300",
-    "tarou": "たろう"
+    "a": "1745244"
   },
   "item_map": {
     "item_name2": {
@@ -12,8 +12,8 @@
         "object": {
           "id": "object",
           "pairs": {
-            "field3": "field_value",
             "field2": "field_value",
+            "field3": "field_value",
             "field1": "300"
           },
           "blocks": {}
@@ -67,16 +67,16 @@
         "aaa": {
           "id": "aaa",
           "pairs": {
-            "ja": "ああああ",
-            "ea": "addaddad"
+            "ea": "addaddad",
+            "ja": "ああああ"
           },
           "blocks": {}
         }
       },
       "reference": {
-        "item_name4": "300",
-        "item_name1": "10",
         "item_name2": "20",
+        "item_name1": "10",
+        "item_name4": "300",
         "item_name3": "10"
       }
     }
