@@ -1,5 +1,9 @@
 use pest::Parser;
+use serde_json::json;
+use serde_json::Value;
+use std::collections::HashMap;
 use std::fs;
+use DML::Block;
 use DML::DMLParser;
 use DML::Processer;
 use DML::Rule;
@@ -16,8 +20,10 @@ fn main() {
 
     // to json
     let json = serde_json::to_string_pretty(&process).unwrap();
-    println!("{}", json);
+    let mut ast: serde_json::Value = json!(&process);
+    // println!("{}", json);
+    // println!("{}", ast);
 
     // to file
-    fs::write("./test.json", json).expect("Unable to write file");
+    fs::write("./ast.json", json).expect("Unable to write file");
 }
