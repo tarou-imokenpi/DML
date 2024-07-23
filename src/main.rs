@@ -169,7 +169,7 @@ impl Processer {
                     value = self.process_string(record.into_inner());
                 }
                 Rule::variable_reference => {
-                    let (ref_id, amount) = self.process_pair(record.into_inner());
+                    let (ref_id, _) = self.process_pair(record.into_inner());
                     if let Some(v) = self.variable_map.get(&ref_id) {
                         value = v.clone();
                     }
@@ -224,7 +224,7 @@ impl Processer {
                     value = self.process_string(record.into_inner());
                 }
                 Rule::variable_reference => {
-                    let (ref_id, amount) = self.process_pair(record.into_inner());
+                    let (ref_id, _) = self.process_pair(record.into_inner());
                     if let Some(v) = self.variable_map.get(&ref_id) {
                         value = v.clone();
                     }
