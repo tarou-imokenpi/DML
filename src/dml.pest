@@ -1,0 +1,27 @@
+dml                = _{ SOI ~ (NEWLINE* ~ object ~ NEWLINE*)* ~ EOI }
+indent             = _{ ("  " | "\t")+ }
+id                 = @{ ASCII_ALPHA ~ (ASCII_ALPHA | ASCII_DIGIT | "_")* }
+number             = @{
+    "-"? ~ ("0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*) ~ ("." ~ ASCII_DIGIT*)? ~ ("e" ~ ("+" | "-")? ~ ASCII_DIGIT+)?
+}
+string             =  { "\"" ~ inner ~ "\"" | "\'" ~ inner ~ "\'" }
+inner              = @{ char* }
+char               =  {
+    !("\"" | "\\") ~ ANY
+  | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+  | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
+}
+value              = _{ number | string | variable_reference }
+pair               =  { id ~ " "* ~ ":" ~ " "* ~ value ~ " "* }
+variable           =  { id ~ " "* ~ "=" ~ " "* ~ value ~ " "* }
+variable_reference =  { "&" ~ " "* ~ id ~ " "* }
+field              = _{ reference | pair }
+reference          =  { "&" ~ " "* ~ id ~ " "* ~ ":" ~ " "* ~ value ~ " "* }
+object             = _{ (item | group | variable) }
+
+item  = { "Item" ~ " " ~ id ~ ":" ~ NEWLINE ~ block }
+group = { "Group" ~ " " ~ id ~ ":" ~ NEWLINE ~ ref_block }
+
+block        =  { indent ~ id ~ ":" ~ NEWLINE ~ nested_block* }
+ref_block    = _{ indent ~ reference ~ NEWLINE* ~ nested_block* }
+nested_block = _{ indent ~ field ~ NEWLINE* | block }

@@ -1,0 +1,84 @@
+{
+  "variable_map": {
+    "kari": "300",
+    "tarou": "たろう",
+    "a": "1745244"
+  },
+  "item_map": {
+    "item_name2": {
+      "id": "item_name2",
+      "pairs": {},
+      "blocks": {
+        "object": {
+          "id": "object",
+          "pairs": {
+            "field3": "field_value",
+            "field1": "300",
+            "field2": "field_value"
+          },
+          "blocks": {}
+        }
+      }
+    },
+    "item_name1": {
+      "id": "item_name1",
+      "pairs": {},
+      "blocks": {
+        "aaaaa": {
+          "id": "aaaaa",
+          "pairs": {},
+          "blocks": {
+            "ob": {
+              "id": "ob",
+              "pairs": {
+                "field1": "field_value",
+                "field2": "field_value"
+              },
+              "blocks": {
+                "ob": {
+                  "id": "ob",
+                  "pairs": {
+                    "field1": "field_value",
+                    "field2": "field_value"
+                  },
+                  "blocks": {
+                    "ob": {
+                      "id": "ob",
+                      "pairs": {
+                        "field1": "field_value",
+                        "field2": "field_value"
+                      },
+                      "blocks": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "group_map": {
+    "group_name": {
+      "id": "group_name",
+      "pairs": {},
+      "blocks": {
+        "aaa": {
+          "id": "aaa",
+          "pairs": {
+            "ea": "addaddad",
+            "ja": "ああああ"
+          },
+          "blocks": {}
+        }
+      },
+      "reference": {
+        "item_name2": "20",
+        "item_name3": "10",
+        "item_name1": "10",
+        "item_name4": "300"
+      }
+    }
+  }
+}

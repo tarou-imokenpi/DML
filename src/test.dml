@@ -1,17 +1,36 @@
-import ファイル名
-from ファイル名 import item_id, group_name
+kari = 300
+tarou = "たろう"
+a = 1745244
+
+Item item_name1:
+  aaaaa:
+    ob:
+      field1 : "field_value"
+      field2 : "field_value"
+      ob:
+        field1 : "field_value"
+        field2 : "field_value"
+    ob:
+      field1 : "field_value"
+      field2 : "field_value"
+
+Item item_name2:
+  object:
+    field1: &kari
+    field2: "field_value"
+    field3: "field_value"
+
+Group group_name:
+  &item_name1: 10
+  &item_name2: 20
+  &item_name3: 10
+  &item_name4: &kari
+
+  aaa:
+    ja:"ああああ"
+    ea: "addaddad"
 
 
-Item Stone:
-  Translations:
-    en: "Stone"
-    ja: "石"
 
-Item Firestone:
-  Translations:
-    en: "Firestone"
-    ja: "火打石"
 
-Group BasicMaterials:
-  &Stone: -1.12
-  &Firestone: -10
+
